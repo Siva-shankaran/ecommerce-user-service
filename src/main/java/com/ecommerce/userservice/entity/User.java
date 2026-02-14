@@ -1,5 +1,7 @@
 package com.ecommerce.userservice.entity;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
@@ -7,7 +9,6 @@ import lombok.*;
 
 @Entity
 @Table(name = "users")
-@NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
@@ -17,15 +18,28 @@ public class User {
 
     private String name;
 
+    private String phone;
+
 	@Column(unique = true, nullable = false)
     private String email;
 
-	@JsonIgnore
     private String password;
 
-    private String role; // USER, SELLER, ADMIN
+    public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	private String role; // USER, SELLER, ADMIN
 
     private Boolean active = true;
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Address> addresses;
+
 
 	public Long getId() {
 		return id;

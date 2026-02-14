@@ -1,5 +1,5 @@
 package com.ecommerce.userservice.config;
-
+import org.springframework.security.core.Authentication;   // ✅ correct
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,7 +22,7 @@ public class SecurityConfig {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    @Bean
+    @Bean	
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
@@ -32,6 +32,8 @@ public class SecurityConfig {
             )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/users/register", "/api/users/login").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

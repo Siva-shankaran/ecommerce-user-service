@@ -7,11 +7,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ecommerce.userservice.dto.LoginRequest;
+import com.ecommerce.userservice.dto.UpdateProfileRequest;
+import com.ecommerce.userservice.dto.UserProfileDto;
 import com.ecommerce.userservice.entity.User;
 import com.ecommerce.userservice.security.JwtUtil;
 import com.ecommerce.userservice.service.UserService;
@@ -54,10 +57,18 @@ public class UserController {
     }
     
     @GetMapping("/profile")
-    public User getProfile(Authentication authentication) {
+    public UserProfileDto getProfile(Authentication authentication) {
+        String email = authentication.getName();
+        return userService.getUserProfile(email);
+    }
 
-        String email = authentication.getName(); // from JWT
-        return userService.getUserByEmail(email);
+    @PutMapping("/profile")
+    public UserProfileDto updateProfile(
+            @RequestBody UpdateProfileRequest request,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+        return userService.updateProfile(email, request);
     }
 
 

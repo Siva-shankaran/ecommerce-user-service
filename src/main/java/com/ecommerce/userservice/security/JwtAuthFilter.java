@@ -33,21 +33,32 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
+        String path = request.getServletPath();
+
+        // 🔴 STEP 1: SKIP JWT FILTER FOR PUBLIC ENDPOINTS
+        if (path.equals("/api/users/login") || path.equals("/api/users/register")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // 🔴 STEP 2: READ AUTH HEADER
         String authHeader = request.getHeader("Authorization");
 
         String token = null;
         String username = null;
 
-        // 🔹 Check Bearer token
-        if (authHeader != null && authHeader.startsWith("Bearer")) {
+        // 🔴 STEP 3: VALIDATE BEARER TOKEN FORMAT
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
             username = jwtUtil.extractUsername(token);
         }
 
-        // 🔹 If user not authenticated yet
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        // 🔴 STEP 4: SET SECURITY CONTEXT
+        if (username != null &&
+            SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            UserDetails userDetails =
+                    userDetailsService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
@@ -63,6 +74,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
+        // 🔴 STEP 5: CONTINUE FILTER CHAIN
         filterChain.doFilter(request, response);
     }
 }
